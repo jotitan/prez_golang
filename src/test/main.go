@@ -9,11 +9,18 @@ import (
 	"io/ioutil"
 	"time"
 	"runtime"
+	"os"
+	"strconv"
 )
 
 func main() {
-
+	fmt.Println("Lancement des tests")
 	n := 10
+	if len(os.Args) > 1 {
+		if val,err := strconv.ParseInt(os.Args[1],10,32) ; err == nil {
+			n = int(val)
+		}
+	}
 	begin := time.Now()
 	runSync(n)
 	fmt.Println("SYNC :", time.Now().Sub(begin))
@@ -21,6 +28,14 @@ func main() {
 	begin = time.Now()
 	runAsync(n, 1)
 	fmt.Println("ASYNC (1) :", time.Now().Sub(begin))
+
+	begin = time.Now()
+	runAsync(n, 4)
+	fmt.Println("ASYNC (4) :", time.Now().Sub(begin))
+
+	begin = time.Now()
+	runAsync(n, 10)
+	fmt.Println("ASYNC (10) :", time.Now().Sub(begin))
 }
 
 func runSync(n int)[]Result{
@@ -30,7 +45,7 @@ func runSync(n int)[]Result{
 		result := Result{position:i,original:value}
 		result.valueUrl1 = callUrl(url1,value)
 		result.valueUrl2 = callUrl(url2,value)
-		result.valueFunc = localFunction(i)
+		result.valueFunc = localHeavyFunction(i)
 		results[i] = result
 	}
 	return results
@@ -44,7 +59,7 @@ func runAsync(n,nbThread int)[]Result{
 			channels := []chan string{make(chan string),make(chan string),make(chan string)}
 			go func(c chan string){c<- callUrl(url1,value)}(channels[0])
 			go func(c chan string){c<- callUrl(url2,value)}(channels[1])
-			go func(c chan string){c<- localFunction(intValue)}(channels[2])
+			go func(c chan string){c<- localHeavyFunction(intValue)}(channels[2])
 
 			result := Result{position:intValue,original:value}
 			result.valueUrl1 = <- channels[0]
@@ -83,5 +98,14 @@ func callUrl(url,value string)string{
 func localFunction(i int)string{
 	m := md5.New()
 	m.Write([]byte(fmt.Sprintf("Value_%d",math.Pow(float64(i*5),float64(5)))))
+	return base64.URLEncoding.EncodeToString(m.Sum(nil))
+}
+
+func localHeavyFunction(i int)string{
+	m := md5.New()
+	n := 1000000
+	for i := 0 ; i < n ; i++ {
+		m.Write([]byte(fmt.Sprintf("Value_%d",math.Pow(float64(i*5),float64(5)))))
+	}
 	return base64.URLEncoding.EncodeToString(m.Sum(nil))
 }
