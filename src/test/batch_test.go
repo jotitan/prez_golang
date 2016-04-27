@@ -1,26 +1,21 @@
-package main
+package test
 
 import (
-	"math"
+	"testing"
 	"fmt"
-	"crypto/md5"
-	"encoding/base64"
-	"net/http"
-	"io/ioutil"
 	"time"
 	"runtime"
-	"os"
-	"strconv"
+	"net/http"
+	"io/ioutil"
+	"crypto/md5"
+	"encoding/base64"
+	"math"
 )
 
-func main() {
-	fmt.Println("Lancement des tests")
+func TestRun(t * testing.T){
 	n := 10
-	if len(os.Args) > 1 {
-		if val,err := strconv.ParseInt(os.Args[1],10,32) ; err == nil {
-			n = int(val)
-		}
-	}
+	fmt.Println("Lancement des tests avec n =",n)
+
 	begin := time.Now()
 	runSync(n)
 	fmt.Println("SYNC :", time.Now().Sub(begin))
@@ -36,6 +31,7 @@ func main() {
 	begin = time.Now()
 	runAsync(n, 10)
 	fmt.Println("ASYNC (10) :", time.Now().Sub(begin))
+
 }
 
 func runSync(n int)[]Result{
@@ -109,3 +105,4 @@ func localHeavyFunction(i int)string{
 	}
 	return base64.URLEncoding.EncodeToString(m.Sum(nil))
 }
+

@@ -14,7 +14,7 @@ func main(){
 	s := http.NewServeMux()
 	s.HandleFunc("/get",func(w http.ResponseWriter,r *http.Request){
 		value := r.FormValue("value")
-		waitTime := time.Millisecond * (time.Duration(1000 + (500 - rand.Int()%1000)))
+		waitTime := time.Millisecond * (time.Duration(700 + (300 - rand.Int()%600)))
 		fmt.Println("Receive",value,"and wait",waitTime,"ms")
 		<-time.Tick(waitTime)
 		w.Write([]byte(fmt.Sprintf("%s_transform_%s",prefix,value)))

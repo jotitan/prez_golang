@@ -17,7 +17,6 @@ func (frs FileResults) Less(i, j int) bool {
 }
 func (frs FileResults) Swap(i, j int){frs[i],frs[j] = frs[j],frs[i]}
 
-
 type FileResult struct {
 	path string
 	size int64
